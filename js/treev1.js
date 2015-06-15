@@ -1,14 +1,19 @@
+//variables used for user options
 var red, green, blue, random, flag, depth_method;
+//audio and canvas variables
 var ctx, source, context, analyser, fbc_array;
 var elem = document.getElementById('canvas');
 var context_render = elem.getContext('2d');
+//array used for storing the coordinates of the tree
 var tree = [];
+//tree path variables 
 var tx1 = 0,
-  tx2 = 0,
-  ty1 = 0,
-  ty2 = 0;
+    tx2 = 0,
+    ty1 = 0,
+    ty2 = 0;
 var branch = 0;
 var deg_to_rad = Math.PI / 180.0;
+//depth of tree
 var depth = 17;
 
 depth_method = false;
@@ -18,16 +23,18 @@ green = false;
 random = true;
 flag = true;
 context_render.lineWidth = 1;
-
+//load audio 
 audio_file.onchange = function() {
   var files = this.files;
   var file = URL.createObjectURL(files[0]);
   audio_player.src = file;
   audio_player.loop = true;
   audio_player.play();
+  //initialize render sequence
   initAudio();
 };
 
+//recursive tree coordinates calculation
 function calcTree(x1, y1, angle, depth) {
   if (depth != 0) {
     var x2 = x1 + (Math.cos(angle * deg_to_rad) * depth * 3.0);
@@ -47,7 +54,8 @@ function calcTree(x1, y1, angle, depth) {
   return true;
 }
 
-function reaarengeTree() {
+//rearrange array produced by recursive calculation of tree so that the layered rendering is made possible
+function rearrangeTree() {
   var size = tree.length;
   var temp_arr = [];
 
@@ -55,6 +63,7 @@ function reaarengeTree() {
 
     for (i = 0; i < tree.length; i++) {
 
+	//rearrange according to depth 
       if (tree[i].depth == j) {
         temp_arr.push({
           x1: tree[i].x1,
@@ -66,29 +75,29 @@ function reaarengeTree() {
       }
     }
   }
-  return temp_arr;
+  //return reversed array because the recursive function calculates the coordinates from top to bottom 
+  return temp_arr.reverse();
 }
 
 function initAudio() {
 
   document.getElementById('audio_player');
   context = new AudioContext();
+  //create analyser
   analyser = context.createAnalyser();
   source = context.createMediaElementSource(audio_player);
   source.connect(analyser);
   analyser.connect(context.destination);
+  //set fft size , ftt size is double the frequencyBinCount that will equal to the frequency bins that will be available
   analyser.fftSize = 32;
-  console.log(audio_player.duration);
-  console.log(analyser.minDecibels);
-  console.log(analyser.maxDecibels);
-
+  //call recursive tree calculation
   calcTree(800, 600, -90, depth);
-
+  
   if (!depth_method) {
-    tree = reaarengeTree();
-    tree.reverse();
+	  //rearrange tree
+    tree = rearrangeTree();
   }
-
+//use of set interval to delay the drawing off the tree, allowing for the visualization 
   var end = setInterval(function drawtree() {
 
     var tcolor = '';
@@ -104,7 +113,7 @@ function initAudio() {
     context_render.moveTo(tx1, ty1);
     context_render.lineTo(tx2, ty2);
     context_render.closePath();
-
+	//user pre-sets options for frequency bin assignment to each rgb colour 
     if (red) {
       r = fbc_array[1];
       g = fbc_array[10];
@@ -128,7 +137,7 @@ function initAudio() {
       g = fbc_array[rand2];
       b = fbc_array[rand3];
     }
-
+	//colourize the branch according to the decibel level of the frequency bin assigned to each rgb value
     tcolor = "rgba(" + r + "," + g + "," + b + ",0.2)";
     context_render.strokeStyle = tcolor;
     context_render.stroke();
@@ -140,7 +149,7 @@ function initAudio() {
     }
   }, 0);
 }
-
+//user colour settings function
 function change_c(clr) {
 
   if (clr == "blue") {
@@ -166,7 +175,7 @@ function change_c(clr) {
     green = false;
   }
 }
-
+//user render settings
 function change_render(selection) {
 
   if (selection == "depth") {
@@ -177,8 +186,8 @@ function change_render(selection) {
 
 }
 
-/***********JQUERY*************/
-
+//***********JQUERY*************//
+//jquery used for button interactivity 
 $("button").click(function() {
   if (!$(this).hasClass("active")) {
     $(this).addClass("active");
