@@ -16,7 +16,7 @@ var deg_to_rad = Math.PI / 180.0;
 //depth of tree
 var depth = 17;
 
-depth_method = false;
+depth_method = true;
 red = false;
 blue = false;
 green = false;
