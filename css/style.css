@@ -57,3 +57,13 @@ button:active, button.active, .button:active, .button.active,  input[type="file"
   width: 160px;
   float: left;
 }
+
+#canvas-container {
+   padding:30px; 
+   width: 100%;
+   text-align:center;
+}
+
+#mycanvas {
+   display: inline;
+}
